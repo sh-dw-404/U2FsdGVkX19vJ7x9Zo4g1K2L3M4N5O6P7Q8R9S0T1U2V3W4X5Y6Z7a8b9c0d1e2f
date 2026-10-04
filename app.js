@@ -60,14 +60,16 @@ function createParticle(x, y, speed) {
     const angle =
         Math.random() * Math.PI * 2;
 
+    const distance =
+        Math.random() * 25 + 5;
+
     const force =
-        Math.random() * 1.8 +
-        speed * 0.03;
+        Math.random() * 1.2 + speed * 0.02;
 
     particles.push({
 
-        x: x,
-        y: y,
+        x: x + Math.cos(angle) * distance,
+        y: y + Math.sin(angle) * distance,
 
         vx: Math.cos(angle) * force,
         vy: Math.sin(angle) * force,
@@ -78,7 +80,7 @@ function createParticle(x, y, speed) {
         life: 1,
 
         decay:
-            Math.random() * 0.018 + 0.012
+            Math.random() * 0.014 + 0.008
     });
 }
 
