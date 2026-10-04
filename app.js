@@ -284,18 +284,32 @@ function animate() {
         const p = particles[i];
 
 
-        p.x += p.vx;
-        p.y += p.vy;
+        const dx = currentX - p.x;
+const dy = currentY - p.y;
 
+const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Slowly slow particles down
+if (isTouching && distance < 180) {
+    const force = (180 - distance) / 180;
 
-        p.vx *= 0.97;
-        p.vy *= 0.97;
+    p.vx += (dx / (distance || 1)) * force * 0.08;
+    p.vy += (dy / (distance || 1)) * force * 0.08;
+}
 
+if (isTouching && distance < 45) {
+    const force = (45 - distance) / 45;
 
-        p.life -= p.decay;
+    p.vx -= (dx / (distance || 1)) * force * 0.35;
+    p.vy -= (dy / (distance || 1)) * force * 0.35;
+}
 
+p.x += p.vx;
+p.y += p.vy;
+
+p.vx *= 0.985;
+p.vy *= 0.985;
+
+p.life -= p.decay;
 
         if (p.life <= 0) {
 
