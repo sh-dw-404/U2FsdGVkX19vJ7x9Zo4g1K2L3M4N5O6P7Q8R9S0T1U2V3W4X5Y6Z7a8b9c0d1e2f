@@ -47,9 +47,11 @@ let isTouching = false;
 // ========================================
 
 const particles = [];
-
 const MAX_PARTICLES = 180;
 
+let ripple = null;
+
+   
 
 function createParticle(x, y, speed) {
 
@@ -96,21 +98,18 @@ function setFinger(x, y) {
 }
 
 
-intro.addEventListener(
-    "pointerdown",
-    function(event) {
+intro.addEventListener("pointerdown", function(event) {
+    isTouching = true;
+    setFinger(event.clientX, event.clientY);
+    light.classList.add("active");
 
-        isTouching = true;
-
-        setFinger(
-            event.clientX,
-            event.clientY
-        );
-
-        light.classList.add("active");
-
-    }
-);
+    ripple = {
+        x: event.clientX,
+        y: event.clientY,
+        radius: 0,
+        strength: 1
+    };
+});
 
 
 intro.addEventListener(
@@ -271,12 +270,30 @@ function animate() {
 
     // Draw particles
 
-    ctx.clearRect(
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+// Animate ripple
+if (ripple) {
+    ripple.radius += 7;
+    ripple.strength *= 0.96;
+
+    ctx.beginPath();
+    ctx.arc(
+        ripple.x,
+        ripple.y,
+        ripple.radius,
         0,
-        0,
-        window.innerWidth,
-        window.innerHeight
+        Math.PI * 2
     );
+
+    ctx.strokeStyle = `rgba(255,255,255,${ripple.strength * 0.35})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    if (ripple.strength < 0.03) {
+        ripple = null;
+    }
+}
 
 
     for (let i = particles.length - 1; i >= 0; i--) {
@@ -289,6 +306,26 @@ const dy = currentY - p.y;
 
 const distance = Math.sqrt(dx * dx + dy * dy);
 
+// Ripple effect
+if (ripple) {
+    const rippleDistance = Math.sqrt(
+        (p.x - ripple.x) * (p.x - ripple.x) +
+        (p.y - ripple.y) * (p.y - ripple.y)
+    );
+
+    const ringWidth = 35;
+
+    if (
+        rippleDistance > ripple.radius - ringWidth &&
+        rippleDistance < ripple.radius + ringWidth
+    ) {
+        const force = ripple.strength *
+            (1 - Math.abs(rippleDistance - ripple.radius) / ringWidth);
+
+        p.vx += ((p.x - ripple.x) / (rippleDistance || 1)) * force * 2;
+        p.vy += ((p.y - ripple.y) / (rippleDistance || 1)) * force * 2;
+    }
+}
 if (isTouching && distance < 180) {
     const force = (180 - distance) / 180;
 
