@@ -4,7 +4,6 @@ const canvas = document.getElementById("particleCanvas");
 
 const ctx = canvas.getContext("2d");
 
-
 // ========================================
 // CANVAS SETUP
 // ========================================
@@ -25,7 +24,7 @@ resizeCanvas();
 
 window.addEventListener("resize", resizeCanvas);
 
-initializeUniverse();
+
 // ========================================
 // FINGER POSITION
 // ========================================
@@ -52,39 +51,22 @@ const MAX_PARTICLES = 300;
 let ripple = null;
 let universeInitialized = false;
 
-   
+
+// ========================================
+// CREATE TOUCH PARTICLE
+// ========================================
 
 function createParticle(x, y, speed) {
 
     if (particles.length >= MAX_PARTICLES) {
         particles.shift();
     }
-function initializeUniverse() {
-    if (universeInitialized) return;
 
-    for (let i = 0; i < MAX_PARTICLES; i++) {
-        particles.push({
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            vx: (Math.random() - 0.5) * 0.15,
-            vy: (Math.random() - 0.5) * 0.15,
-            size: Math.random() * 1.8 + 0.4,
-            life: Math.random() * 0.7 + 0.3,
-            decay: 0.001
-        });
-    }
+    const angle = Math.random() * Math.PI * 2;
 
-    universeInitialized = true;
-}
+    const distance = Math.random() * 25 + 5;
 
-    const angle =
-        Math.random() * Math.PI * 2;
-
-    const distance =
-        Math.random() * 25 + 5;
-
-    const force =
-        Math.random() * 1.2 + speed * 0.02;
+    const force = Math.random() * 1.2 + speed * 0.02;
 
     particles.push({
 
@@ -94,15 +76,45 @@ function initializeUniverse() {
         vx: Math.cos(angle) * force,
         vy: Math.sin(angle) * force,
 
-        size:
-            Math.random() * 2.2 + 0.6,
+        size: Math.random() * 2.2 + 0.6,
 
         life: 1,
 
-        decay:
-            Math.random() * 0.014 + 0.008
+        decay: Math.random() * 0.014 + 0.008
     });
 }
+
+
+// ========================================
+// CREATE AMBIENT UNIVERSE
+// ========================================
+
+function initializeUniverse() {
+
+    if (universeInitialized) return;
+
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+
+        particles.push({
+
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+
+            vx: (Math.random() - 0.5) * 0.15,
+            vy: (Math.random() - 0.5) * 0.15,
+
+            size: Math.random() * 1.8 + 0.4,
+
+            life: Math.random() * 0.7 + 0.3,
+
+            decay: 0
+        });
+    }
+
+    universeInitialized = true;
+}
+
+initializeUniverse();
 
 
 // ========================================
@@ -117,14 +129,23 @@ function setFinger(x, y) {
 
 
 intro.addEventListener("pointerdown", function(event) {
+
     isTouching = true;
-    setFinger(event.clientX, event.clientY);
+
+    setFinger(
+        event.clientX,
+        event.clientY
+    );
+
     light.classList.add("active");
 
     ripple = {
+
         x: event.clientX,
         y: event.clientY,
+
         radius: 0,
+
         strength: 1
     };
 });
@@ -138,7 +159,6 @@ intro.addEventListener(
             event.clientX,
             event.clientY
         );
-
     }
 );
 
@@ -150,7 +170,6 @@ intro.addEventListener(
         isTouching = false;
 
         light.classList.remove("active");
-
     }
 );
 
@@ -162,7 +181,6 @@ intro.addEventListener(
         isTouching = false;
 
         light.classList.remove("active");
-
     }
 );
 
@@ -183,6 +201,16 @@ intro.addEventListener(
             touch.clientX,
             touch.clientY
         );
+
+        ripple = {
+
+            x: touch.clientX,
+            y: touch.clientY,
+
+            radius: 0,
+
+            strength: 1
+        };
 
     },
     { passive: false }
@@ -224,11 +252,12 @@ intro.addEventListener(
 
 function animate() {
 
-    // Smooth movement
+    // ------------------------------------
+    // Smooth finger movement
+    // ------------------------------------
 
     const smoothness =
         isTouching ? 0.22 : 0.12;
-
 
     currentX +=
         (targetX - currentX) *
@@ -239,23 +268,29 @@ function animate() {
         smoothness;
 
 
-    // Calculate finger speed
+    // ------------------------------------
+    // Finger speed
+    // ------------------------------------
 
-    const dx =
+    const fingerDX =
         currentX - lastX;
 
-    const dy =
+    const fingerDY =
         currentY - lastY;
 
     const speed =
-        Math.sqrt(dx * dx + dy * dy);
-
+        Math.sqrt(
+            fingerDX * fingerDX +
+            fingerDY * fingerDY
+        );
 
     lastX = currentX;
     lastY = currentY;
 
 
+    // ------------------------------------
     // Move light
+    // ------------------------------------
 
     light.style.left =
         currentX + "px";
@@ -264,7 +299,9 @@ function animate() {
         currentY + "px";
 
 
-    // Create particles while moving
+    // ------------------------------------
+    // Create particles while touching
+    // ------------------------------------
 
     if (isTouching && speed > 0.5) {
 
@@ -281,90 +318,214 @@ function animate() {
                 currentY,
                 speed
             );
-
         }
     }
 
 
-    // Draw particles
+    // ------------------------------------
+    // Clear canvas
+    // ------------------------------------
 
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-// Animate ripple
-if (ripple) {
-    ripple.radius += 7;
-    ripple.strength *= 0.96;
-
-    ctx.beginPath();
-    ctx.arc(
-        ripple.x,
-        ripple.y,
-        ripple.radius,
+    ctx.clearRect(
         0,
-        Math.PI * 2
+        0,
+        window.innerWidth,
+        window.innerHeight
     );
 
-    ctx.strokeStyle = `rgba(255,255,255,${ripple.strength * 0.35})`;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
 
-    if (ripple.strength < 0.03) {
-        ripple = null;
+    // ------------------------------------
+    // Ripple
+    // ------------------------------------
+
+    if (ripple) {
+
+        ripple.radius += 7;
+
+        ripple.strength *= 0.96;
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            ripple.x,
+            ripple.y,
+            ripple.radius,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.strokeStyle =
+            `rgba(255,255,255,${ripple.strength * 0.35})`;
+
+        ctx.lineWidth = 1.5;
+
+        ctx.stroke();
+
+
+        if (ripple.strength < 0.03) {
+
+            ripple = null;
+        }
     }
-}
 
 
-    for (let i = particles.length - 1; i >= 0; i--) {
+    // ------------------------------------
+    // PARTICLE PHYSICS
+    // ------------------------------------
+
+    for (
+        let i = particles.length - 1;
+        i >= 0;
+        i--
+    ) {
 
         const p = particles[i];
 
 
-        const dx = currentX - p.x;
-const dy = currentY - p.y;
+        // --------------------------------
+        // Finger attraction / repulsion
+        // --------------------------------
 
-const distance = Math.sqrt(dx * dx + dy * dy);
+        const dx =
+            currentX - p.x;
 
-// Ripple effect
-if (ripple) {
-    const rippleDistance = Math.sqrt(
-        (p.x - ripple.x) * (p.x - ripple.x) +
-        (p.y - ripple.y) * (p.y - ripple.y)
-    );
+        const dy =
+            currentY - p.y;
 
-    const ringWidth = 35;
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
 
-    if (
-        rippleDistance > ripple.radius - ringWidth &&
-        rippleDistance < ripple.radius + ringWidth
-    ) {
-        const force = ripple.strength *
-            (1 - Math.abs(rippleDistance - ripple.radius) / ringWidth);
 
-        p.vx += ((p.x - ripple.x) / (rippleDistance || 1)) * force * 2;
-        p.vy += ((p.y - ripple.y) / (rippleDistance || 1)) * force * 2;
-    }
-}
-if (isTouching && distance < 180) {
-    const force = (180 - distance) / 180;
+        if (
+            isTouching &&
+            distance < 180
+        ) {
 
-    p.vx += (dx / (distance || 1)) * force * 0.08;
-    p.vy += (dy / (distance || 1)) * force * 0.08;
-}
+            const force =
+                (180 - distance) / 180;
 
-if (isTouching && distance < 45) {
-    const force = (45 - distance) / 45;
+            p.vx +=
+                (dx / (distance || 1)) *
+                force *
+                0.08;
 
-    p.vx -= (dx / (distance || 1)) * force * 0.35;
-    p.vy -= (dy / (distance || 1)) * force * 0.35;
-}
+            p.vy +=
+                (dy / (distance || 1)) *
+                force *
+                0.08;
+        }
 
-p.x += p.vx;
-p.y += p.vy;
 
-p.vx *= 0.985;
-p.vy *= 0.985;
+        if (
+            isTouching &&
+            distance < 45
+        ) {
 
-p.life -= p.decay;
+            const force =
+                (45 - distance) / 45;
+
+            p.vx -=
+                (dx / (distance || 1)) *
+                force *
+                0.35;
+
+            p.vy -=
+                (dy / (distance || 1)) *
+                force *
+                0.35;
+        }
+
+
+        // --------------------------------
+        // Ripple force
+        // --------------------------------
+
+        if (ripple) {
+
+            const rippleDX =
+                p.x - ripple.x;
+
+            const rippleDY =
+                p.y - ripple.y;
+
+            const rippleDistance =
+                Math.sqrt(
+                    rippleDX * rippleDX +
+                    rippleDY * rippleDY
+                );
+
+            const ringWidth = 35;
+
+
+            if (
+                rippleDistance >
+                    ripple.radius - ringWidth &&
+
+                rippleDistance <
+                    ripple.radius + ringWidth
+            ) {
+
+                const force =
+                    ripple.strength *
+                    (
+                        1 -
+                        Math.abs(
+                            rippleDistance -
+                            ripple.radius
+                        ) /
+                        ringWidth
+                    );
+
+
+                p.vx +=
+                    (rippleDX /
+                        (rippleDistance || 1)) *
+                    force *
+                    2;
+
+                p.vy +=
+                    (rippleDY /
+                        (rippleDistance || 1)) *
+                    force *
+                    2;
+            }
+        }
+
+
+        // --------------------------------
+        // Move particle
+        // --------------------------------
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+
+        // --------------------------------
+        // Slow particle
+        // --------------------------------
+
+        p.vx *= 0.985;
+        p.vy *= 0.985;
+
+
+        // --------------------------------
+        // Ambient particle life
+        // --------------------------------
+
+        if (p.decay > 0) {
+
+            p.life -= p.decay;
+        }
+
+
+        // --------------------------------
+        // Remove dead particles
+        // --------------------------------
 
         if (p.life <= 0) {
 
@@ -374,23 +535,57 @@ p.life -= p.decay;
         }
 
 
+        // --------------------------------
+        // Screen wrapping
+        // --------------------------------
+
+        if (p.x < -10) {
+            p.x = window.innerWidth + 10;
+        }
+
+        if (p.x > window.innerWidth + 10) {
+            p.x = -10;
+        }
+
+        if (p.y < -10) {
+            p.y = window.innerHeight + 10;
+        }
+
+        if (p.y > window.innerHeight + 10) {
+            p.y = -10;
+        }
+
+
+        // --------------------------------
+        // Draw particle
+        // --------------------------------
+
         ctx.beginPath();
 
         ctx.arc(
             p.x,
             p.y,
-            p.size * p.life,
+            p.size * Math.max(p.life, 0.3),
             0,
             Math.PI * 2
         );
 
 
         ctx.fillStyle =
-            `rgba(255,255,255,${p.life * 0.7})`;
+            `rgba(
+                255,
+                255,
+                255,
+                ${Math.max(p.life, 0.3) * 0.7}
+            )`;
 
         ctx.fill();
     }
 
+
+    // ------------------------------------
+    // Continue animation
+    // ------------------------------------
 
     requestAnimationFrame(animate);
 }
