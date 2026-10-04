@@ -37,6 +37,7 @@ body {
             #070707 45%,
             #000000 100%
         );
+         touch-action: none;
 }
 
 /* The interactive light */
@@ -101,4 +102,20 @@ h1 {
     font-size: 14px;
 
     opacity: 0.45;
+}
+#light {
+    transition:
+        width 0.25s ease,
+        height 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+#light.active {
+    width: 45px;
+    height: 45px;
+
+    box-shadow:
+        0 0 25px rgba(255,255,255,0.95),
+        0 0 70px rgba(255,255,255,0.55),
+        0 0 140px rgba(255,255,255,0.25);
 }
