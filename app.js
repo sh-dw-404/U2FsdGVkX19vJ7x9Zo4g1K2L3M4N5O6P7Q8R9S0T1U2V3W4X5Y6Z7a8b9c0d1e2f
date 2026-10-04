@@ -25,7 +25,7 @@ resizeCanvas();
 
 window.addEventListener("resize", resizeCanvas);
 
-
+initializeUniverse();
 // ========================================
 // FINGER POSITION
 // ========================================
@@ -47,9 +47,10 @@ let isTouching = false;
 // ========================================
 
 const particles = [];
-const MAX_PARTICLES = 180;
+const MAX_PARTICLES = 300;
 
 let ripple = null;
+let universeInitialized = false;
 
    
 
@@ -58,6 +59,23 @@ function createParticle(x, y, speed) {
     if (particles.length >= MAX_PARTICLES) {
         particles.shift();
     }
+function initializeUniverse() {
+    if (universeInitialized) return;
+
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+        particles.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            vx: (Math.random() - 0.5) * 0.15,
+            vy: (Math.random() - 0.5) * 0.15,
+            size: Math.random() * 1.8 + 0.4,
+            life: Math.random() * 0.7 + 0.3,
+            decay: 0.001
+        });
+    }
+
+    universeInitialized = true;
+}
 
     const angle =
         Math.random() * Math.PI * 2;
